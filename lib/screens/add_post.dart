@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:blog_app_firebase/components/round_button.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 class AddPostScreen extends StatefulWidget {
@@ -19,8 +19,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
 
   bool showSpinner = false;
-  final postRef = FirebaseDatabase.instance.reference().child('Posts');
-  firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
+  final postRef = FirebaseDatabase.instance.ref().child('Posts');
+  FirebaseStorage storage = FirebaseStorage.instance;
 
   FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -203,7 +203,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
                     int date = DateTime.now().microsecondsSinceEpoch;
 
-                    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref('/blog_app_firebase$date');
+                    Reference ref = FirebaseStorage.instance.ref('/blog_app_firebase/$date');
                     UploadTask uploadTask = ref.putFile(_image!.absolute);
                     await Future.value(uploadTask);
                     var newUrl = await ref.getDownloadURL();
