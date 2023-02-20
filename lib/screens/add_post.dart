@@ -8,6 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+
+import 'home_screen.dart';
+
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({Key? key}) : super(key: key);
 
@@ -16,8 +19,6 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
-
-
   bool showSpinner = false;
   final postRef = FirebaseDatabase.instance.ref().child('Posts');
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -97,13 +98,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
       inAsyncCall: showSpinner,
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          automaticallyImplyLeading: true,
           title: Text('Upload Blog'),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
             child: Column(
               children: [
                 InkWell(
@@ -192,54 +194,53 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 SizedBox(
                   height: 30,
                 ),
-                RoundButton(title: 'Post', onPress: ()async {
-
-                  setState(() {
-                    showSpinner =true;
-
-                  });
-
-                  try{
-
-                    int date = DateTime.now().microsecondsSinceEpoch;
-
-                    Reference ref = FirebaseStorage.instance.ref('/blog_app_firebase/$date');
-                    UploadTask uploadTask = ref.putFile(_image!.absolute);
-                    await Future.value(uploadTask);
-                    var newUrl = await ref.getDownloadURL();
-                    final User? user =  _auth.currentUser;
-
-                    postRef.child('Post List').child(date.toString()).set({
-                      'pId':date.toString(),
-                      'pImage':newUrl.toString(),
-                      'pTime':date.toString(),
-                      'pTitle':titleController.text.toString(),
-                      'pDescription':descriptionController.text.toString(),
-                      'uEmail':user!.email.toString(),
-                      'uid':user!.uid.toString(),
-
-                    }).then((value){
-                      toastMessage('Post published');
+                RoundButton(
+                    title: 'Post',
+                    onPress: () async {
                       setState(() {
-                        showSpinner =false;
-
+                        showSpinner = true;
                       });
-                    }).onError((error, stackTrace) {
-                      toastMessage(error.toString());
-                      setState(() {
-                        showSpinner =false;
 
-                      });
-                    });
+                      try {
+                        int date = DateTime.now().microsecondsSinceEpoch;
 
-                  }catch(e){
-                    setState(() {
-                      showSpinner =false;
+                        Reference ref = FirebaseStorage.instance
+                            .ref('/blog_app_firebase/$date');
+                        UploadTask uploadTask = ref.putFile(_image!.absolute);
+                        await Future.value(uploadTask);
+                        var newUrl = await ref.getDownloadURL();
+                        final User? user = _auth.currentUser;
 
-                    });
-                    toastMessage(e.toString());
-                  }
-                }),
+                        postRef.child('Post List').child(date.toString()).set({
+                          'pId': date.toString(),
+                          'pImage': newUrl.toString(),
+                          'pTime': date.toString(),
+                          'pTitle': titleController.text.toString(),
+                          'pDescription': descriptionController.text.toString(),
+                          'uEmail': user!.email.toString(),
+                          'uid': user!.uid.toString(),
+                        }).then((value) {
+                          toastMessage('Post published');
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomeScreen()));
+                          setState(() {
+                            showSpinner = false;
+                          });
+                        }).onError((error, stackTrace) {
+                          toastMessage(error.toString());
+                          setState(() {
+                            showSpinner = false;
+                          });
+                        });
+                      } catch (e) {
+                        setState(() {
+                          showSpinner = false;
+                        });
+                        toastMessage(e.toString());
+                      }
+                    }),
               ],
             ),
           ),
@@ -247,7 +248,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
       ),
     );
   }
-  void toastMessage(String message){
+
+  void toastMessage(String message) {
     Fluttertoast.showToast(
         msg: message.toString(),
         toastLength: Toast.LENGTH_SHORT,
@@ -255,7 +257,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.white,
         textColor: Colors.black,
-        fontSize: 16.0
-    );
+        fontSize: 16.0);
   }
 }
