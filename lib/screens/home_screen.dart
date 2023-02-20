@@ -15,6 +15,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final databaseReference = FirebaseDatabase.instance.ref().child('Posts');
   FirebaseAuth auth = FirebaseAuth.instance;
+
+  TextEditingController searchController = TextEditingController();
+  String search = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,62 +55,144 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TextFormField(
+              controller: searchController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                  hintText: 'Search with blog title',
+                  prefixIcon: Icon(Icons.search_outlined),
+                  // labelText: 'Search',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30))),
+              onChanged: (value) {
+                search = value;
+              },
+            ),
             Expanded(
               child: FirebaseAnimatedList(
                 query: databaseReference.child('Post List'),
                 itemBuilder: (BuildContext context, DataSnapshot snapshot,
                     Animation<double> animation, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: FadeInImage.assetNetwork(
-                              fit: BoxFit.cover,
-                              width: MediaQuery.of(context).size.width * 1,
-                              height: MediaQuery.of(context).size.height * .25,
-                              placeholder: 'images/tohru.jpg',
-                              image: snapshot.child('pImage').value!.toString(),
+                  String tempTitle = snapshot.child('pTitle').value.toString();
+                  if (searchController.text.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: FadeInImage.assetNetwork(
+                                fit: BoxFit.cover,
+                                width: MediaQuery.of(context).size.width * 1,
+                                height:
+                                    MediaQuery.of(context).size.height * .25,
+                                placeholder: 'images/tohru.jpg',
+                                image:
+                                    snapshot.child('pImage').value!.toString(),
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              snapshot.child('pTitle').value!.toString(),
-                              style: TextStyle(
-                                  fontSize: 23, fontWeight: FontWeight.w500),
+                            SizedBox(
+                              height: 10,
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              snapshot.child('pDescription').value!.toString(),
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w400),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                snapshot.child('pTitle').value!.toString(),
+                                style: TextStyle(
+                                    fontSize: 23, fontWeight: FontWeight.w500),
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                snapshot
+                                    .child('pDescription')
+                                    .value!
+                                    .toString(),
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w400),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } else if (tempTitle
+                      .toLowerCase()
+                      .contains(searchController.text.toString())) {
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: FadeInImage.assetNetwork(
+                                fit: BoxFit.cover,
+                                width: MediaQuery.of(context).size.width * 1,
+                                height:
+                                    MediaQuery.of(context).size.height * .25,
+                                placeholder: 'images/tohru.jpg',
+                                image:
+                                    snapshot.child('pImage').value!.toString(),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                snapshot.child('pTitle').value!.toString(),
+                                style: TextStyle(
+                                    fontSize: 23, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                snapshot
+                                    .child('pDescription')
+                                    .value!
+                                    .toString(),
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w400),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Container();
+                  }
                 },
               ),
             ),
